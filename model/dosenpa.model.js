@@ -6,5 +6,5 @@ Dosen.hasOne(DosenPa, { foreignKey: { allowNull: false, name: "nip_dosen" } });
 DosenPa.belongsTo(Dosen, {
 	foreignKey: { allowNull: false, name: "nip_dosen", unique: true },
 });
-// DosenPa.sync({ alter: true });
+DosenPa.sync();
 module.exports = DosenPa;

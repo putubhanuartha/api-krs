@@ -38,7 +38,7 @@ const Mahasiswa = sequelize.define(
 		total_krs: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
-			defaultValue : 0
+			defaultValue: 0,
 		},
 	},
 	{ freezeTableName: true }
@@ -49,5 +49,5 @@ DosenPa.hasMany(Mahasiswa, {
 Mahasiswa.belongsTo(DosenPa, {
 	foreignKey: { allowNull: true, name: "nip_dosen" },
 });
-// Mahasiswa.sync({ alter: true });
+Mahasiswa.sync();
 module.exports = Mahasiswa;

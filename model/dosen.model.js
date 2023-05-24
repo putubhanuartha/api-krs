@@ -35,5 +35,5 @@ const Dosen = sequelize.define(
 	},
 	{ freezeTableName: true }
 );
-// Dosen.sync({ alter: true });
+Dosen.sync();
 module.exports = Dosen;

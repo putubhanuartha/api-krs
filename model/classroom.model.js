@@ -16,5 +16,5 @@ const ClassRoom = sequelize.define(
 	},
 	{ freezeTableName: true }
 );
-// ClassRoom.sync({ alter: true });
+ClassRoom.sync();
 module.exports = ClassRoom;

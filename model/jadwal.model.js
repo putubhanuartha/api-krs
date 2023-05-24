@@ -1,9 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/orm");
 const MataKuliah = require("./matakuliah.model");
-
 const Jadwal = sequelize.define(
-	"Jadwal",
+	"jadwal",
 	{
 		id: {
 			primaryKey: true,
@@ -30,11 +29,6 @@ const Jadwal = sequelize.define(
 	{ freezeTableName: true }
 );
 
-Jadwal.hasMany(MataKuliah, {
-	foreignKey: { name: "idJadwal", allowNull: true },
-});
-MataKuliah.belongsTo(Jadwal, {
-	foreignKey: { name: "idJadwal", allowNull: true },
-});
-// Jadwal.sync({ alter: true });
+
+Jadwal.sync();
 module.exports = Jadwal;

@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/orm");
 const ClassRoom = require("./classroom.model.js");
 const Dosen = require("./dosen.model.js");
-
+const Jadwal = require("./jadwal.model.js");
 const MataKuliah = sequelize.define(
 	"MataKuliah",
 	{
@@ -28,6 +28,16 @@ const MataKuliah = sequelize.define(
 			allowNull: false,
 			defaultValue: 0,
 		},
+		kode_ruang_kelas: {
+			type: DataTypes.STRING(10),
+			allowNull: true,
+			unique: "unik_jadwal_kelas",
+		},
+		idJadwal: {
+			type: DataTypes.STRING,
+			unique: "unik_jadwal_kelas",
+			allowNull: true,
+		},
 	},
 	{ freezeTableName: true }
 );
@@ -38,11 +48,12 @@ MataKuliah.belongsTo(Dosen, {
 	foreignKey: { allowNull: true, name: "nip_dosen" },
 });
 ClassRoom.hasMany(MataKuliah, {
-	foreignKey: { allowNull: true, name: "kode_ruang_kelas" },
+	foreignKey: { name: "kode_ruang_kelas" },
 });
 MataKuliah.belongsTo(ClassRoom, {
-	foreignKey: { allowNull: true, name: "kode_ruang_kelas" },
+	foreignKey: { name: "kode_ruang_kelas" },
 });
-
-// MataKuliah.sync({ alter: true });
+Jadwal.hasMany(MataKuliah, { foreignKey: "idJadwal" });
+MataKuliah.belongsTo(Jadwal, { foreignKey: "idJadwal" });
+MataKuliah.sync();
 module.exports = MataKuliah;

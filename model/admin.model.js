@@ -14,5 +14,5 @@ const Admin = sequelize.define(
 	},
 	{ freezeTableName: true }
 );
-Admin.sync({ alter: true });
+Admin.sync();
 module.exports = Admin;
