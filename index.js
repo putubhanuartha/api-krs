@@ -25,4 +25,7 @@ sequelize
 			console.log("server is running at port : " + port);
 		});
 	})
-	.catch((err) => console.log("failed to connect to database"));
+	.catch((err) => {
+		console.log(err);
+		console.log("failed to connect to database");
+	});
