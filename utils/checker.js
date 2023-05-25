@@ -25,7 +25,7 @@ const isTimeInRange = (
 	return (
 		((timenewStart >= timeStart && timenewStart <= timeEnd) ||
 			(timenewEnd >= timeStart && timenewEnd <= timeEnd)) &&
-		hari_choosen.toLowerCase() == hari.toLowerCase()
+		hari_choosen == hari
 	);
 };
 const isSksCountAvailable = (Mahasiswa, sks) => {
