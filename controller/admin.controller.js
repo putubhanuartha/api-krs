@@ -149,8 +149,8 @@ exports.addDosen = (req, res) => {
 			res.status(200).json({ message: "data berhasil ditambahkan" });
 		})
 		.catch((err) => {
-			const errorMessage = err.parent.text;
-			res.status(404).json({ message: errorMessage });
+			console.log(err);
+			res.status(404).json({ message: "data gagal ditambahkan" });
 		});
 };
 exports.addMahasiswa = (req, res) => {
@@ -168,8 +168,8 @@ exports.addMahasiswa = (req, res) => {
 			res.status(200).json({ message: "data berhasil ditambahkan" });
 		})
 		.catch((err) => {
-			const errorMessage = err.parent.text;
-			res.status(404).json({ message: errorMessage });
+			console.log(err);
+			res.status(404).json({ message: "data gagal ditambahkan" });
 		});
 };
 exports.addMatkul = (req, res) => {
@@ -196,8 +196,8 @@ exports.addDosenPa = (req, res) => {
 			res.status(200).json({ message: "data berhasil ditambahkan" });
 		})
 		.catch((err) => {
-			const errorMessage = err.parent.text;
-			res.status(404).json({ message: errorMessage });
+			console.log(err);
+			res.status(404).json({ message: "data gagal ditambahkan" });
 		});
 };
 exports.addKelas = (req, res) => {
@@ -210,8 +210,8 @@ exports.addKelas = (req, res) => {
 			res.status(200).json({ message: "data berhasil ditambahkan" });
 		})
 		.catch((err) => {
-			const errorMessage = err.parent.text;
-			res.status(404).json({ message: errorMessage });
+			console.log(err);
+			res.status(404).json({ message: "data gagal ditambahkan" });
 		});
 };
 exports.addKrs = async (req, res) => {
