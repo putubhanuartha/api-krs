@@ -389,45 +389,58 @@ exports.addJadwal = async (req, res) => {
 exports.updateMatkul = async (req, res) => {
 	// able to update nip_dosen, kode_ruang_kelas, nama_matkul
 	// update ruang kelas if capacity is enough
+
 	const { nip_dosen, kode_ruang_kelas, nama_matkul, sks, kapasitas, idJadwal } =
 		req.query;
 	const { matkulId } = req.params;
-	let kode_ruang = kode_ruang_kelas;
-	const matkul = await MataKuliah.findOne({ where: { kode_kelas: matkulId } });
-	const ruangKelas = await ClassRoom.findOne({
-		where: { kode_ruang_kelas: kode_ruang },
-	});
-	if (!isCapacityBenchFulfilled(matkul, ruangKelas, kapasitas)) {
-		kode_ruang = null;
-	}
-	MataKuliah.update(
-		{
-			nip_dosen,
-			kode_ruang_kelas: sequelize.literal(
-				`COALESCE(kode_ruang_kelas, ${sequelize.escape(kode_ruang)})`
-			),
-			nama_matkul,
-			sks,
-			kapasitas,
-			idJadwal,
-		},
-		{
-			where: {
-				kode_kelas: matkulId,
-			},
-		}
-	)
-		.then(([affectedRows]) => {
-			if (affectedRows === 0) {
-				res.status(400).json({ message: "data  tidak ditemukan" });
-			} else {
-				res.status(200).json({ message: "sukses mengupdate data" });
-			}
-		})
-		.catch((err) => {
-			console.log(err);
-			res.status(404).json({ message: "gagal mengupdate data" });
+	let kode_ruang = null;
+	
+	try {
+		const matkul = await MataKuliah.findOne({
+			where: { kode_kelas: matkulId },
 		});
+		const ruangKelas = await ClassRoom.findOne({
+			where: { kode_ruang_kelas: kode_ruang },
+		});
+		if (kode_ruang_kelas) {
+			kode_ruang = kode_ruang_kelas;
+			if (!isCapacityBenchFulfilled(matkul, ruangKelas, kapasitas)) {
+				kode_ruang = null;
+			}
+		}
+		
+		MataKuliah.update(
+			{
+				nip_dosen,
+				kode_ruang_kelas: sequelize.literal(
+					`COALESCE(kode_ruang_kelas, ${sequelize.escape(kode_ruang)})`
+				),
+				nama_matkul,
+				sks,
+				kapasitas,
+				idJadwal,
+			},
+			{
+				where: {
+					kode_kelas: matkulId,
+				},
+			}
+		)
+			.then(([affectedRows]) => {
+				if (affectedRows === 0) {
+					res.status(400).json({ message: "data  tidak ditemukan" });
+				} else {
+					res.status(200).json({ message: "sukses mengupdate data" });
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				res.status(404).json({ message: "gagal mengupdate data" });
+			});
+	} catch (err) {
+		console.log(err);
+		res.status(504).json({ message: "gagal menambah data" });
+	}
 };
 exports.updateDosen = (req, res) => {
 	// able to update nama , tanggal_lahir, gender, no_hp
