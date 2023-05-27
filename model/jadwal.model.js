@@ -30,5 +30,5 @@ const Jadwal = sequelize.define(
 );
 
 
-Jadwal.sync();
+// Jadwal.sync();
 module.exports = Jadwal;

@@ -49,5 +49,5 @@ DosenPa.hasMany(Mahasiswa, {
 Mahasiswa.belongsTo(DosenPa, {
 	foreignKey: { allowNull: true, name: "nip_dosen" },
 });
-Mahasiswa.sync();
+// Mahasiswa.sync();
 module.exports = Mahasiswa;

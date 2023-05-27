@@ -3,10 +3,15 @@ const sequelize = require("../utils/orm");
 const Admin = sequelize.define(
 	"Admin",
 	{
-		username: {
+		id: {
 			type: DataTypes.STRING,
 			allowNull: false,
 			primaryKey: true,
+		},
+		username: {
+			type: DataTypes.STRING,
+			allowNull: false,
+			unique: true,
 		},
 		password: {
 			type: DataTypes.STRING,
@@ -14,5 +19,5 @@ const Admin = sequelize.define(
 	},
 	{ freezeTableName: true }
 );
-Admin.sync();
+// Admin.sync({ alter: true });
 module.exports = Admin;

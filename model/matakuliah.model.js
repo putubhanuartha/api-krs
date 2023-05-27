@@ -55,5 +55,5 @@ MataKuliah.belongsTo(ClassRoom, {
 });
 Jadwal.hasMany(MataKuliah, { foreignKey: "idJadwal" });
 MataKuliah.belongsTo(Jadwal, { foreignKey: "idJadwal" });
-MataKuliah.sync();
+// MataKuliah.sync();
 module.exports = MataKuliah;

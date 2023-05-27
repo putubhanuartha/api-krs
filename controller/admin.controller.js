@@ -5,9 +5,12 @@ const DosenPa = require("../model/dosenpa.model");
 const ClassRoom = require("../model/classroom.model.js");
 const Krs = require("../model/krs.model.js");
 const Jadwal = require("../model/jadwal.model.js");
+const Admin = require("../model/admin.model");
 const sequelize = require("../utils/orm.js");
+const bcrypt = require("bcrypt");
 const { Op } = require("sequelize");
 const createIdJadwal = require("../utils/id.generator").createIdJadwal;
+const createIdUser = require("../utils/id.generator").createIdUser;
 const validateInsertTimeSchedule =
 	require("../utils/checker.js").validateInsertTimeSchedule;
 const isTimeInRange = require("../utils/checker.js").isTimeInRange;
@@ -75,6 +78,7 @@ exports.viewMatkul = (req, res) => {
 		include: [
 			{ model: Dosen, attributes: ["nama", "nip"] },
 			{ model: ClassRoom, attributes: ["kode_ruang_kelas", "kapasitas"] },
+			{ model: Jadwal },
 		],
 	})
 		.then((result) => {
@@ -132,6 +136,16 @@ exports.viewMahasiswabyMatkul = (req, res) => {
 		.catch((err) => {
 			console.log(err);
 			res.status(404).json({ message: "bad request" });
+		});
+};
+exports.viewJadwal = (req, res) => {
+	Jadwal.findAll()
+		.then((data) => {
+			res.status(200).json({ message: "data dikirimkan", data });
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: "data gagal dikirimkan" });
 		});
 };
 
@@ -271,14 +285,15 @@ exports.addKrs = async (req, res) => {
 			})
 		);
 		const arrJadwal = jadwalMhs.map((el) => {
-			return el.dataValues.Jadwal.dataValues;
+			return el.dataValues.jadwal.dataValues;
 		});
+
 		if (
 			checkArrInRange(
 				arrJadwal,
-				selectedMatkul.getDataValue("Jadwal").dataValues.start_class_time,
-				selectedMatkul.getDataValue("Jadwal").dataValues.end_class_time,
-				selectedMatkul.getDataValue("Jadwal").dataValues.hari
+				selectedMatkul.getDataValue("jadwal").dataValues.start_class_time,
+				selectedMatkul.getDataValue("jadwal").dataValues.end_class_time,
+				selectedMatkul.getDataValue("jadwal").dataValues.hari
 			)
 		) {
 			res.status(500).json({ message: "data jadwal bertabrakan" });
@@ -394,7 +409,7 @@ exports.updateMatkul = async (req, res) => {
 		req.query;
 	const { matkulId } = req.params;
 	let kode_ruang = null;
-	
+
 	try {
 		const matkul = await MataKuliah.findOne({
 			where: { kode_kelas: matkulId },
@@ -408,7 +423,7 @@ exports.updateMatkul = async (req, res) => {
 				kode_ruang = null;
 			}
 		}
-		
+
 		MataKuliah.update(
 			{
 				nip_dosen,
@@ -662,6 +677,26 @@ exports.deleteKrs = (req, res) => {
 			console.log(err);
 			res.status(500).json({ message: "data gagal dihapus" });
 		});
+};
+
+exports.signupAdmin = async (req, res) => {
+	const { username, password } = req.body;
+	const salt = bcrypt.genSaltSync(9);
+	if (username && password) {
+		const hashedPassword = bcrypt.hashSync(password, salt);
+		try {
+			await Admin.create({
+				id: createIdUser(username),
+				username,
+				password: hashedPassword,
+			});
+			res.status(200).json({ message: "admin terdaftar" });
+		} catch (err) {
+			res.status(500).json({ message: "error" });
+		}
+		return;
+	}
+	res.status(404).json({ message: "password || nama kosong" });
 };
 
 function checkArrInRange(arrVal, start_time, end_time, hari) {

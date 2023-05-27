@@ -221,14 +221,14 @@ exports.addKrsMahasiswa = async (req, res) => {
 			})
 		);
 		const arrJadwal = jadwalMhs.map((el) => {
-			return el.dataValues.Jadwal.dataValues;
+			return el.dataValues.jadwal.dataValues;
 		});
 		if (
 			checkArrInRange(
 				arrJadwal,
-				selectedMatkul.getDataValue("Jadwal").dataValues.start_class_time,
-				selectedMatkul.getDataValue("Jadwal").dataValues.end_class_time,
-				selectedMatkul.getDataValue("Jadwal").dataValues.hari
+				selectedMatkul.getDataValue("jadwal").dataValues.start_class_time,
+				selectedMatkul.getDataValue("jadwal").dataValues.end_class_time,
+				selectedMatkul.getDataValue("jadwal").dataValues.hari
 			)
 		) {
 			res.status(500).json({ message: "data jadwal bertabrakan" });

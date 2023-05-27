@@ -1,4 +1,3 @@
-const ClassRoom = require("./model/classroom.model");
 const express = require("express");
 const sequelize = require("./utils/orm");
 const app = express();
@@ -9,7 +8,8 @@ const port = process.env.PORT;
 // route imports
 const adminRoutes = require("./routes/admin.routes");
 const mahasiswaRoutes = require("./routes/mahasiswa.routes");
-
+const dosenRoutes = require("./routes/dosen.routes");
+const dosenPaRoutes = require("./routes/dosenPA.routes");
 // middleware
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -17,6 +17,8 @@ app.use(express.json());
 
 app.use("/admin", adminRoutes);
 app.use("/mahasiswa", mahasiswaRoutes);
+app.use("/dosen", dosenRoutes);
+app.use("/dosenpa", dosenPaRoutes);
 
 sequelize
 	.authenticate()
