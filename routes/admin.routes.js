@@ -74,7 +74,7 @@ Route.delete(
 	adminController.deleteDosen
 );
 Route.delete(
-	"/delete-dosenpa/:dosenId",
+	"/delete-dosenpa/:dosenPaId",
 	userAuth.adminAuth,
 	adminController.deleteDosenPa
 );

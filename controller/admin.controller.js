@@ -872,10 +872,10 @@ exports.deleteDosen = (req, res) => {
 		});
 };
 exports.deleteDosenPa = (req, res) => {
-	const { dosenId } = req.params;
+	const { dosenPaId } = req.params;
 	DosenPa.destroy({
 		where: {
-			nip_dosen: dosenId,
+			nip_dosen: dosenPaId,
 		},
 	})
 		.then((rowDeleted) => {
