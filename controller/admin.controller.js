@@ -988,55 +988,7 @@ exports.deleteJadwal = async (req, res) => {
 		});
 	}
 };
-exports.deleteKrs = (req, res) => {
-	const { MahasiswaNim, MataKuliahKodeKelas } = req.body;
-	Krs.destroy({
-		where: {
-			MahasiswaNim,
-			MataKuliahKodeKelas,
-		},
-	})
-		.then(async (row) => {
-			console.log(row);
-			if (row == 0) {
-				res
-					.status(404)
-					.json({ message: "data tidak ditemukan", status: 404, error: true });
-			} else {
-				const krs = await MataKuliah.findOne({
-					where: { kode_kelas: MataKuliahKodeKelas },
-					attributes: ["sks"],
-				});
-				// update to decrement filled bench number
-				await MataKuliah.update(
-					{ filled_bench: sequelize.literal(`filled_bench - 1`) },
-					{
-						where: {
-							kode_kelas: MataKuliahKodeKelas,
-						},
-					}
-				);
-				// update to decrement sks number of mahasiswa
-				await Mahasiswa.update(
-					{
-						total_krs: sequelize.literal(
-							`total_krs - ${krs.getDataValue("sks")}`
-						),
-					},
-					{ where: { nim: MahasiswaNim } }
-				);
-				res.status(200).json({
-					message: "data berhasil dihapus, jumlah sks mahasiswa dikurangi",
-					status: 200,
-					error: true,
-				});
-			}
-		})
-		.catch((err) => {
-			console.log(err);
-			res.status(500).json({ message: "data gagal dihapus" });
-		});
-};
+
 
 exports.signupAdmin = async (req, res) => {
 	const { username, password } = req.body;
