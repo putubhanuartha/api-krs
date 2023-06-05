@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
-const protectCsrf = csrf({ cookie: true });
+const protectCsrf = csrf({ cookie: { sameSite: "none", secure: true } });
 
 // route imports
 const adminRoutes = require("./routes/admin.routes");
@@ -17,7 +17,7 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-app.use(cors());
+app.use(cors({ origin: "http://127.0.0.1:5173", credentials: true }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
@@ -33,13 +33,11 @@ app.use(protectCsrf);
 app.use(function (err, req, res, next) {
 	if (err.code !== "EBADCSRFTOKEN") return next(err);
 	// handle CSRF token errors here
-	res
-		.status(403)
-		.json({
-			message: "invalid CSRF Token, please include it in request header",
-			status: 403,
-			error: true,
-		});
+	res.status(403).json({
+		message: "invalid CSRF Token, please include it in request header",
+		status: 403,
+		error: true,
+	});
 });
 
 // routes
