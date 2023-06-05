@@ -93,6 +93,6 @@ Route.delete(
 	userAuth.adminAuth,
 	adminController.deleteJadwal
 );
-Route.delete("/delete-krs/", userAuth.adminAuth, adminController.deleteKrs);
+
 
 module.exports = Route;
