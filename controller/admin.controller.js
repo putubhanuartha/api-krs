@@ -363,12 +363,23 @@ exports.addMahasiswa = (req, res) => {
 		});
 };
 exports.addMatkul = (req, res) => {
-	const { kode_kelas, nama_matkul, sks, kapasitas } = req.body;
+	const {
+		kode_kelas,
+		nama_matkul,
+		sks,
+		kapasitas,
+		kode_ruang_kelas,
+		idJadwal,
+		nip_dosen,
+	} = req.body;
 	MataKuliah.create({
 		kode_kelas,
 		nama_matkul,
 		sks,
 		kapasitas,
+		idJadwal,
+		nip_dosen,
+		kode_ruang_kelas,
 	})
 		.then(() => {
 			res.status(200).json({
@@ -564,7 +575,7 @@ exports.addKrs = async (req, res) => {
 	}
 };
 exports.addJadwal = async (req, res) => {
-	const { hari, start_time, end_time } = req.query;
+	const { hari, start_time, end_time } = req.body;
 	const hariLowerCase = hari.toLowerCase();
 	const id = createIdJadwal(hariLowerCase);
 	if (validateInsertTimeSchedule(start_time, end_time, hariLowerCase)) {

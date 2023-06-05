@@ -8,7 +8,7 @@ const userAuth = require("../middleware/user.auth.middleware");
 Route.post("/login", adminController.loginAdmin);
 Route.delete("/logout", userAuth.adminAuth, adminController.logoutAdmin);
 Route.post("/signup", adminController.signupAdmin);
-Route.get("/token", adminController.getLoginCsrf);
+Route.get("/token ", adminController.getLoginCsrf);
 
 // get
 Route.get("/bio", userAuth.adminAuth, adminController.viewBio);
