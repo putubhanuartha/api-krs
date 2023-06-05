@@ -394,6 +394,8 @@ exports.addKrsMahasiswa = async (req, res) => {
 		});
 	}
 };
+
+// authentication
 exports.signupMahasiswa = async (req, res) => {
 	const { nim, password } = req.body;
 	const salt = bcrypt.genSaltSync(10);
