@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../utils/orm");
+const sequelize = require("../utils/orm").sequelize;
 const ClassRoom = sequelize.define(
 	"class_room",
 	{

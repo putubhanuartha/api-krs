@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../utils/orm");
+const sequelize = require("../utils/orm").sequelize;
 const ClassRoom = require("./classroom.model.js");
 const Dosen = require("./dosen.model.js");
 const Jadwal = require("./jadwal.model.js");

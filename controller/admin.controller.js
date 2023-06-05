@@ -21,36 +21,75 @@ const isCapacityBenchFulfilled =
 // view controller
 exports.viewDosen = (req, res) => {
 	Dosen.findAll({
-		attributes: ["nip", "nama", "tanggal_lahir", "gender", "no_hp"],
+		attributes: {
+			exclude: ["password"],
+		},
 	})
 		.then((result) => {
-			console.log(result);
 			const arrResult = result.map((el) => el.dataValues);
-			res.status(200).json({ message: "Data dikirimkan", data: arrResult });
+			if (arrResult == null || arrResult.length == 0) {
+				return res
+					.status(404)
+					.json({ message: "data tidak ditemukan", status: 404, error: true });
+			} else {
+				return res.status(200).json({
+					message: "Data dosen berhasil dikirimkan",
+					data: arrResult,
+					status: 200,
+					error: false,
+				});
+			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data tidak tersedia" });
+			res.status(500).json({
+				message: "server gagal memberikan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.viewDosenPa = async (req, res) => {
 	try {
 		const result = await DosenPa.findAll({
 			include: [{ model: Dosen, attributes: ["nama", "nip"] }],
+			attributes: {
+				exclude: ["password"],
+			},
 		});
 		const arrResult = result.map((el) => {
 			return el.dataValues;
 		});
-		res.status(200).json({ message: "Data dikirimkan", data: arrResult });
+		if (arrResult.length == 0 || arrResult == null) {
+			res
+				.status(404)
+				.json({ message: "data tidak ditemukan", status: 404, error: true });
+		} else {
+			res.status(200).json({
+				message: "Data dikirimkan",
+				data: arrResult,
+				status: 200,
+				error: false,
+			});
+		}
 	} catch (err) {
-		res.status(404).json({ message: "bad request" });
+		res.status(500).json({
+			message: "server gagal mengirimkan data",
+			status: 500,
+			error: true,
+		});
 	}
 };
 exports.viewMahasiswa = async (req, res) => {
 	try {
 		const result = await Mahasiswa.findAll({
-			attributes: ["nim", "nama", "tanggal_lahir", "gender", "no_hp", "ipk"],
-			include: DosenPa,
+			attributes: {
+				exclude: ["password"],
+			},
+			include: {
+				model: DosenPa,
+				attributes: { exclude: ["password"] },
+			},
 		});
 
 		const arrRes = await Promise.all(
@@ -60,48 +99,97 @@ exports.viewMahasiswa = async (req, res) => {
 					const nip = er.dataValues.DosenPa.dataValues.nip_dosen;
 					namaDosen = await Dosen.findOne({
 						where: { nip },
-						attributes: ["nama", "nip"],
+						attributes: {
+							exclude: ["password"],
+						},
 					});
 				}
 				return { ...er.dataValues, DosenPa: namaDosen };
 			})
 		);
-		res.status(200).json({ message: "data dikirimkan", data: arrRes });
+		if (arrRes == null || arrRes.length == 0) {
+			res
+				.status(404)
+				.json({ message: "data tidak ditemukan", status: 404, error: true });
+		} else {
+			res.status(200).json({
+				message: "data mahasiswa berhasil dikirimkan",
+				data: arrRes,
+				status: 200,
+				error: false,
+			});
+		}
 	} catch (err) {
 		console.log(err);
-		res.status(404).json({ message: "bad request" });
+		res.status(500).json({
+			message: "server gagal memproses data",
+			status: 500,
+			error: true,
+		});
 	}
 };
 exports.viewMatkul = (req, res) => {
 	MataKuliah.findAll({
-		attributes: ["kode_kelas", "nama_matkul", "sks", "kapasitas"],
+		attributes: {
+			exclude: ["createdAt, updatedAt"],
+		},
 		include: [
-			{ model: Dosen, attributes: ["nama", "nip"] },
-			{ model: ClassRoom, attributes: ["kode_ruang_kelas", "kapasitas"] },
+			{ model: Dosen, attributes: { exclude: ["password"] } },
+			{ model: ClassRoom },
 			{ model: Jadwal },
 		],
 	})
 		.then((result) => {
 			console.log(result);
 			const arrResult = result.map((el) => el.dataValues);
-			res.status(200).json({ message: "Data dikirimkan", data: arrResult });
+			if (arrResult == null || arrResult.length == 0) {
+				res
+					.status(404)
+					.json({ message: "Data tidak ditemukan", status: 404, error: true });
+			} else {
+				res.status(200).json({
+					message: "Data mata kuliah berhasil dikirimkan",
+					data: arrResult,
+					status: 200,
+					error: false,
+				});
+			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data tidak tersedia" });
+			res.status(500).json({
+				message: "server gagal mengirimkan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.viewKelas = (req, res) => {
-	ClassRoom.findAll({
-		attributes: ["kode_ruang_kelas", "kapasitas"],
-	})
+	ClassRoom.findAll()
 		.then((result) => {
 			const arrResult = result.map((el) => el.dataValues);
-			res.status(200).json({ message: "Data dikirimkan", data: arrResult });
+			if (arrResult == null || arrResult.length == 0) {
+				res.status(404).json({
+					message: "data ruang kelas tidak ditemukan",
+					status: 404,
+					error: true,
+				});
+			} else {
+				res.status(200).json({
+					message: "Data ruang kelas berhasil dikirimkan",
+					data: arrResult,
+					status: 200,
+					error: false,
+				});
+			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data tidak tersedia" });
+			res.status(500).json({
+				message: "server gagal memproses data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.viewMatkulbyMahasiswa = (req, res) => {
@@ -114,11 +202,26 @@ exports.viewMatkulbyMahasiswa = (req, res) => {
 	})
 		.then((result) => {
 			const arrRes = result.map((err) => err.dataValues);
-			res.status(200).json({ message: "data ditampilkan", data: arrRes });
+			if (arrRes == null || arrRes.length == 0) {
+				res
+					.status(404)
+					.json({ message: "data tidak ditemukan", status: 404, error: true });
+			} else {
+				res.status(200).json({
+					message: "data berhasil dikirimkan",
+					data: arrRes,
+					status: 200,
+					error: false,
+				});
+			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "bad request" });
+			res.status(500).json({
+				message: "server gagal memproses data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.viewMahasiswabyMatkul = (req, res) => {
@@ -131,27 +234,84 @@ exports.viewMahasiswabyMatkul = (req, res) => {
 	})
 		.then((result) => {
 			const arrRes = result.map((err) => err.dataValues);
-			res.status(200).json({ message: "data ditampilkan", data: arrRes });
+			if (arrRes == null || arrRes.length == 0) {
+				res
+					.status(404)
+					.json({ message: "data tidak ditemukan", status: 404, error: true });
+			} else {
+				res.status(200).json({
+					message: "data ditampilkan",
+					data: arrRes,
+					status: 200,
+					error: false,
+				});
+			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "bad request" });
+			res.status(500).json({
+				message: "server gagal memproses data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.viewJadwal = (req, res) => {
 	Jadwal.findAll()
 		.then((data) => {
-			res.status(200).json({ message: "data dikirimkan", data });
+			if (data == null || data.length == 0) {
+				res
+					.status(404)
+					.json({ message: "data tidak ditemukan", status: 404, error: true });
+			} else {
+				res.status(200).json({
+					message: "data berhasil dikirimkan",
+					data,
+					status: 200,
+					error: false,
+				});
+			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(500).json({ message: "data gagal dikirimkan" });
+			res.status(500).json({
+				message: "server gagal memproses data",
+				status: 500,
+				error: true,
+			});
 		});
+};
+exports.viewBio = async (req, res) => {
+	try {
+		const admin = await Admin.findOne({
+			where: { id: req.session.uid },
+			attributes: { exclude: ["password"] },
+		});
+		if (admin.length == 0 || admin == null) {
+			res
+				.status(403)
+				.json({ message: "data tidak ditemukan", status: 403, error: true });
+		} else {
+			res.status(200).json({
+				message: "data dikirmkan",
+				data: admin,
+				status: 200,
+				error: false,
+			});
+		}
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({
+			message: "server gagal memproses data",
+			status: 500,
+			error: true,
+		});
+	}
 };
 
 // post controller
 exports.addDosen = (req, res) => {
-	const { nip, nama, tanggal_lahir, gender, no_hp, ipk } = req.body;
+	const { nip, nama, tanggal_lahir, gender, no_hp } = req.body;
 	Dosen.create({
 		nip: nip,
 		nama: nama,
@@ -160,11 +320,19 @@ exports.addDosen = (req, res) => {
 		no_hp: no_hp,
 	})
 		.then(() => {
-			res.status(200).json({ message: "data berhasil ditambahkan" });
+			res.status(200).json({
+				message: "data berhasil ditambahkan",
+				status: 200,
+				error: false,
+			});
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data gagal ditambahkan" });
+			res.status(500).json({
+				message: "server gagal menambahkan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.addMahasiswa = (req, res) => {
@@ -179,16 +347,23 @@ exports.addMahasiswa = (req, res) => {
 		nip_dosen,
 	})
 		.then(() => {
-			res.status(200).json({ message: "data berhasil ditambahkan" });
+			res.status(200).json({
+				message: "data berhasil ditambahkan",
+				status: 200,
+				error: false,
+			});
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data gagal ditambahkan" });
+			res.status(500).json({
+				message: "server gagal menambahkan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.addMatkul = (req, res) => {
 	const { kode_kelas, nama_matkul, sks, kapasitas } = req.body;
-
 	MataKuliah.create({
 		kode_kelas,
 		nama_matkul,
@@ -196,11 +371,19 @@ exports.addMatkul = (req, res) => {
 		kapasitas,
 	})
 		.then(() => {
-			res.status(200).json({ message: "data berhasil ditambahkan" });
+			res.status(200).json({
+				message: "data berhasil ditambahkan",
+				status: 200,
+				error: false,
+			});
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data gagal ditambahkan" });
+			res.status(500).json({
+				message: "server gagal menambahkan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.addDosenPa = (req, res) => {
@@ -211,7 +394,11 @@ exports.addDosenPa = (req, res) => {
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data gagal ditambahkan" });
+			res.status(500).json({
+				message: "server gagal menambahkan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.addKelas = (req, res) => {
@@ -225,7 +412,11 @@ exports.addKelas = (req, res) => {
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(404).json({ message: "data gagal ditambahkan" });
+			res.status(500).json({
+				message: "server gagal menambahkan data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.addKrs = async (req, res) => {
@@ -250,8 +441,10 @@ exports.addKrs = async (req, res) => {
 			attributes: ["MataKuliahKodeKelas"],
 		});
 		if (isMatkulSelected(MataKuliahKodeKelas, matkul)) {
-			res.status(500).json({
+			res.status(400).json({
 				message: "Mahasiswa sudah memiliki matkul tersebut",
+				status: 400,
+				error: true,
 			});
 			return;
 		}
@@ -262,9 +455,11 @@ exports.addKrs = async (req, res) => {
 			where: { kode_kelas: MataKuliahKodeKelas, idJadwal: { [Op.ne]: null } },
 		});
 		if (!matkulFounded) {
-			res.status(500).json({
+			res.status(404).json({
 				message:
 					"Mata kuliah belum memiliki jadwal || Mata kuliah tidak ditemukan",
+				status: 404,
+				error: true,
 			});
 			return;
 		}
@@ -296,7 +491,9 @@ exports.addKrs = async (req, res) => {
 				selectedMatkul.getDataValue("jadwal").dataValues.hari
 			)
 		) {
-			res.status(500).json({ message: "data jadwal bertabrakan" });
+			res
+				.status(400)
+				.json({ message: "data jadwal bertabrakan", status: 400, error: true });
 			return;
 		}
 
@@ -306,14 +503,22 @@ exports.addKrs = async (req, res) => {
 			selectedMatkul.getDataValue("filled_bench") ==
 			selectedMatkul.getDataValue("kapasitas")
 		) {
-			res.status(503).json({ message: "kapasitas kelas melebihi" });
+			res.status(400).json({
+				message: "kapasitas kelas melebihi",
+				status: 400,
+				error: true,
+			});
 			return;
 		}
 
 		// check matkul availability for mahasiswa based on their IPK and selected SKS
 		// check apakah mahasiswa boleh memilih matkul tersebut berdasarkan IPK dan jumlah sks mereka
 		if (!isSksCountAvailable(mahasiswa, sks)) {
-			res.status(500).json({ message: "IPK Mahasiswa tidak mencukupi" });
+			res.status(400).json({
+				message: "IPK Mahasiswa tidak mencukupi",
+				status: 400,
+				error: true,
+			});
 			return;
 		}
 
@@ -335,15 +540,27 @@ exports.addKrs = async (req, res) => {
 		// Updating krs join table
 		Krs.create({ MahasiswaNim, MataKuliahKodeKelas })
 			.then(() => {
-				res.status(200).json({ message: "data berhasil ditambahkan" });
+				res.status(200).json({
+					message: "data berhasil ditambahkan",
+					status: 200,
+					error: false,
+				});
 			})
 			.catch((err) => {
 				console.log(err);
-				res.status(400).json({ message: "data gagal ditambahkan" });
+				res.status(500).json({
+					message: "server gagal menambahkan data",
+					status: 500,
+					error: true,
+				});
 			});
 	} catch (err) {
 		console.log(err);
-		res.status(400).json({ message: "data gagal ditambahkan" });
+		res.status(500).json({
+			message: "server gagal menambahkan data",
+			status: 500,
+			error: true,
+		});
 	}
 };
 exports.addJadwal = async (req, res) => {
@@ -443,18 +660,34 @@ exports.updateMatkul = async (req, res) => {
 		)
 			.then(([affectedRows]) => {
 				if (affectedRows === 0) {
-					res.status(400).json({ message: "data  tidak ditemukan" });
+					res.status(404).json({
+						message: "data  tidak ditemukan",
+						status: 404,
+						error: true,
+					});
 				} else {
-					res.status(200).json({ message: "sukses mengupdate data" });
+					res.status(200).json({
+						message: "sukses mengupdate data",
+						status: 200,
+						error: false,
+					});
 				}
 			})
 			.catch((err) => {
 				console.log(err);
-				res.status(404).json({ message: "gagal mengupdate data" });
+				res.status(500).json({
+					message: "server gagal mengupdate data",
+					status: 500,
+					error: true,
+				});
 			});
 	} catch (err) {
 		console.log(err);
-		res.status(504).json({ message: "gagal menambah data" });
+		res.status(500).json({
+			message: "server gagal mengupdate data",
+			status: 500,
+			error: true,
+		});
 	}
 };
 exports.updateDosen = (req, res) => {
@@ -471,14 +704,26 @@ exports.updateDosen = (req, res) => {
 	)
 		.then(([affectedRows]) => {
 			if (affectedRows === 0) {
-				res.status(404).json({ message: "data tidak ditemukan" });
+				res.status(404).json({
+					message: "data  tidak ditemukan",
+					status: 404,
+					error: true,
+				});
 			} else {
-				res.status(200).json({ message: "data berhasil di update" });
+				res.status(200).json({
+					message: "sukses mengupdate data",
+					status: 200,
+					error: false,
+				});
 			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(400).json({ message: "gagal mengupdate data" });
+			res.status(500).json({
+				message: "server gagal mengupdate data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.updateMahasiswa = (req, res) => {
@@ -494,14 +739,26 @@ exports.updateMahasiswa = (req, res) => {
 	)
 		.then(([affectedRows]) => {
 			if (affectedRows === 0) {
-				res.status(404).json({ message: "data tidak ditemukan" });
+				res.status(404).json({
+					message: "data  tidak ditemukan",
+					status: 404,
+					error: true,
+				});
 			} else {
-				res.status(200).json({ message: "data berhasil di update" });
+				res.status(200).json({
+					message: "sukses mengupdate data",
+					status: 200,
+					error: false,
+				});
 			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(400).json({ message: "gagal mengupdate data" });
+			res.status(500).json({
+				message: "server gagal mengupdate data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.updateKelas = (req, res) => {
@@ -517,14 +774,26 @@ exports.updateKelas = (req, res) => {
 	)
 		.then(([affectedRows]) => {
 			if (affectedRows === 0) {
-				res.status(404).json({ message: "data tidak ditemukan" });
+				res.status(404).json({
+					message: "data  tidak ditemukan",
+					status: 404,
+					error: true,
+				});
 			} else {
-				res.status(200).json({ message: "data berhasil di update" });
+				res.status(200).json({
+					message: "sukses mengupdate data",
+					status: 200,
+					error: false,
+				});
 			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(400).json({ message: "gagal mengupdate data" });
+			res.status(500).json({
+				message: "server gagal mengupdate data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 
@@ -538,13 +807,26 @@ exports.deleteMahasiswa = (req, res) => {
 	})
 		.then((rowDeleted) => {
 			if (rowDeleted === 1) {
-				res.status(200).json({ message: "sukses menghapus data" });
+				res.status(200).json({
+					message: "sukses menghapus data",
+					status: 200,
+					error: false,
+				});
 			} else {
-				res.status(404).json({ message: "data not found" });
+				res.status(404).json({
+					message: "data tidak ditemukan, data tidak dihapus",
+					status: 404,
+					error: true,
+				});
 			}
 		})
 		.catch((err) => {
-			res.status(409).json({ message: err.message });
+			console.log(err);
+			res.status(500).json({
+				message: "server gagal menghapus data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.deleteDosen = (req, res) => {
@@ -556,13 +838,26 @@ exports.deleteDosen = (req, res) => {
 	})
 		.then((rowDeleted) => {
 			if (rowDeleted === 1) {
-				res.status(200).json({ message: "sukses menghapus data" });
+				res.status(200).json({
+					message: "sukses menghapus data",
+					status: 200,
+					error: false,
+				});
 			} else {
-				res.status(404).json({ message: "data not found" });
+				res.status(404).json({
+					message: "data tidak ditemukan, data tidak dihapus",
+					status: 404,
+					error: true,
+				});
 			}
 		})
 		.catch((err) => {
-			res.status(409).json({ message: err.message });
+			console.log(err);
+			res.status(500).json({
+				message: "server gagal menghapus data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.deleteDosenPa = (req, res) => {
@@ -574,13 +869,26 @@ exports.deleteDosenPa = (req, res) => {
 	})
 		.then((rowDeleted) => {
 			if (rowDeleted === 1) {
-				res.status(200).json({ message: "sukses menghapus data" });
+				res.status(200).json({
+					message: "sukses menghapus data",
+					status: 200,
+					error: false,
+				});
 			} else {
-				res.status(404).json({ message: "data not found" });
+				res.status(404).json({
+					message: "data tidak ditemukan, data tidak dihapus",
+					status: 404,
+					error: true,
+				});
 			}
 		})
 		.catch((err) => {
-			res.status(409).json({ message: err.message });
+			console.log(err);
+			res.status(500).json({
+				message: "server gagal menghapus data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.deleteKelas = (req, res) => {
@@ -592,13 +900,26 @@ exports.deleteKelas = (req, res) => {
 	})
 		.then((rowDeleted) => {
 			if (rowDeleted === 1) {
-				res.status(200).json({ message: "sukses menghapus data" });
+				res.status(200).json({
+					message: "sukses menghapus data",
+					status: 200,
+					error: false,
+				});
 			} else {
-				res.status(404).json({ message: "data not found" });
+				res.status(404).json({
+					message: "data tidak ditemukan, data tidak dihapus",
+					status: 404,
+					error: true,
+				});
 			}
 		})
 		.catch((err) => {
-			res.status(409).json({ message: err.message });
+			console.log(err);
+			res.status(500).json({
+				message: "server gagal menghapus data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.deleteMatkul = (req, res) => {
@@ -610,13 +931,26 @@ exports.deleteMatkul = (req, res) => {
 	})
 		.then((rowDeleted) => {
 			if (rowDeleted === 1) {
-				res.status(200).json({ message: "sukses menghapus data" });
+				res.status(200).json({
+					message: "sukses menghapus data",
+					status: 200,
+					error: false,
+				});
 			} else {
-				res.status(404).json({ message: "data not found" });
+				res.status(404).json({
+					message: "data tidak ditemukan, data tidak dihapus",
+					status: 404,
+					error: true,
+				});
 			}
 		})
 		.catch((err) => {
-			res.status(409).json({ message: err.message });
+			console.log(err);
+			res.status(500).json({
+				message: "server gagal menghapus data",
+				status: 500,
+				error: true,
+			});
 		});
 };
 exports.deleteJadwal = async (req, res) => {
@@ -624,13 +958,23 @@ exports.deleteJadwal = async (req, res) => {
 	try {
 		const deleted = await Jadwal.destroy({ where: { id: idJadwal } });
 		if (deleted == 0) {
-			res.status(400).json({ message: "data tidak ditemukan" });
+			res.status(404).json({
+				message: "data tidak ditemukan, data tidak dihapus",
+				status: 404,
+				error: true,
+			});
 		} else {
-			res.status(200).json({ message: "data dihapus" });
+			res
+				.status(200)
+				.json({ message: "data berhasil dihapus", status: 200, error: false });
 		}
 	} catch (err) {
 		console.log(err);
-		res.status(400).json({ message: "data gagal dihapus" });
+		res.status(500).json({
+			message: "server gagal menghapus data",
+			status: 500,
+			error: true,
+		});
 	}
 };
 exports.deleteKrs = (req, res) => {
@@ -644,7 +988,9 @@ exports.deleteKrs = (req, res) => {
 		.then(async (row) => {
 			console.log(row);
 			if (row == 0) {
-				res.status(400).json({ message: "data tidak ditemukan" });
+				res
+					.status(404)
+					.json({ message: "data tidak ditemukan", status: 404, error: true });
 			} else {
 				const krs = await MataKuliah.findOne({
 					where: { kode_kelas: MataKuliahKodeKelas },
@@ -670,6 +1016,8 @@ exports.deleteKrs = (req, res) => {
 				);
 				res.status(200).json({
 					message: "data berhasil dihapus, jumlah sks mahasiswa dikurangi",
+					status: 200,
+					error: true,
 				});
 			}
 		})
@@ -690,13 +1038,91 @@ exports.signupAdmin = async (req, res) => {
 				username,
 				password: hashedPassword,
 			});
-			res.status(200).json({ message: "admin terdaftar" });
+			res.status(200).json({
+				message: "admin berhasil terdaftar",
+				status: 200,
+				error: false,
+			});
 		} catch (err) {
-			res.status(500).json({ message: "error" });
+			res.status(500).json({
+				message: "admin gagal mendaftar || duplikasi username",
+				status: 500,
+				error: true,
+			});
 		}
 		return;
 	}
-	res.status(404).json({ message: "password || nama kosong" });
+	res
+		.status(400)
+		.json({ message: "password || nama kosong", status: 400, error: true });
+};
+exports.logoutAdmin = async (req, res) => {
+	try {
+		if (req.session) {
+			return req.session.destroy((err) => {
+				if (err) {
+					res.status(401).json({
+						message: "user not authenticated",
+						status: 401,
+						error: true,
+					});
+				} else {
+					res.status(200).json({
+						message: "user berhasil log out",
+						error: false,
+						status: 200,
+					});
+				}
+			});
+		}
+	} catch (err) {
+		console.log(err);
+		res
+			.status(401)
+			.json({ message: "user not authenticated", error: true, status: 401 });
+	}
+};
+exports.loginAdmin = async (req, res) => {
+	const { username, password } = req.body;
+	try {
+		const userAdmin = await Admin.findOne({
+			where: {
+				username,
+			},
+		});
+		if (!userAdmin) {
+			return res.status(404).json({
+				message: "username tidak ditemukan",
+				status: 404,
+				error: true,
+			});
+		}
+		if (bcrypt.compareSync(password, userAdmin.getDataValue("password"))) {
+			req.session.uid = await userAdmin.getDataValue("id");
+			req.session.role = "admin";
+			req.session.isLoggedIn = true;
+			return res
+				.status(200)
+				.json({ message: "admin berhasil log in", status: 200, error: false });
+		}
+		res.status(401).json({
+			message: "password salah",
+			status: 401,
+			error: true,
+		});
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({
+			message: "Server Error, Cannot Log in",
+			status: 500,
+			error: true,
+		});
+	}
+};
+exports.getLoginCsrf = (req, res) => {
+	res
+		.status(200)
+		.json({ csrfToken: req.csrfToken(), error: false, status: 200 });
 };
 
 function checkArrInRange(arrVal, start_time, end_time, hari) {

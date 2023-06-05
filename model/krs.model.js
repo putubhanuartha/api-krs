@@ -1,4 +1,4 @@
-const sequelize = require("../utils/orm");
+const sequelize = require("../utils/orm").sequelize;
 const Mahasiswa = require("./mahasiswa.model");
 const MataKuliah = require("./matakuliah.model");
 const Krs = sequelize.define("krs", {}, { freezeTableName: true });

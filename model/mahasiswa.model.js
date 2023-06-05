@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../utils/orm");
+const sequelize = require("../utils/orm").sequelize;
 const MataKuliah = require("./matakuliah.model.js");
 const DosenPa = require("./dosenpa.model");
 const Mahasiswa = sequelize.define(
