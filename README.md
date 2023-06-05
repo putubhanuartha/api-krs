@@ -1,6 +1,7 @@
 # api-krs
 Course selection sheet information system API 
-
+## **Server Url** 
+ - https://api-krs-production.up.railway.app/
 ## **Admin Routes** 
 `/admin/`
 - ### Authentication
