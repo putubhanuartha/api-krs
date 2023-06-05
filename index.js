@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
-const protectCsrf = csrf({ cookie: { sameSite: "lax", secure: true } });
+const protectCsrf = csrf({ cookie: true });
 
 // route imports
 const adminRoutes = require("./routes/admin.routes");
