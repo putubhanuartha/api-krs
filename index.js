@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
-const protectCsrf = csrf({ cookie: true });
+const protectCsrf = csrf({ cookie: { sameSite: "none", secure: true } });
 
 // route imports
 const adminRoutes = require("./routes/admin.routes");
@@ -17,7 +17,9 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-app.use(cors({ origin: "https://codesandbox-react.netlify.app", credentials: true }));
+app.use(
+	cors({ origin: "https://codesandbox-react.netlify.app", credentials: true })
+);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
