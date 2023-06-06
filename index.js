@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
-const protectCsrf = csrf({ cookie: { sameSite: "none", secure: true } });
+const protectCsrf = csrf({ cookie: true });
 
 // route imports
 const adminRoutes = require("./routes/admin.routes");
@@ -17,7 +17,7 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-app.use(cors({ origin: "http://127.0.0.1:5173", credentials: true }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
@@ -39,6 +39,11 @@ app.use(function (err, req, res, next) {
 		error: true,
 	});
 });
+
+// app.use(function (req, res, next) {
+// 	res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+// 	next();
+// });
 
 // routes
 app.use("/admin", adminRoutes);
