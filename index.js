@@ -29,11 +29,6 @@ app.use(
 		resave: false,
 		saveUninitialized: true,
 		store: sequelizeSessionStore,
-		cookie: {
-			secure: true,
-			sameSite: "none",
-			httpOnly: false,
-		},
 	})
 );
 app.use(protectCsrf);
