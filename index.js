@@ -17,7 +17,7 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-app.use(cors({ origin: "https://codesandbox-react.netlify.app/", credentials: true }));
+app.use(cors({ origin: "https://codesandbox-react.netlify.app", credentials: true }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
