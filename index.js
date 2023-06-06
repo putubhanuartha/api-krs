@@ -17,7 +17,23 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-app.use(cors({ origin: process.env.URL_ORIGIN, credentials: true }));
+app.use(
+	cors({
+		origin: (origin, callback) => {
+			// Check if the Referer header matches the desired URLs
+			if (
+				origin === "http://localhost:5173" ||
+				origin === "http://localhost:5173/" ||
+				origin === undefined
+			) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"));
+			}
+		},
+		credentials: true,
+	})
+);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
@@ -39,8 +55,6 @@ app.use(function (err, req, res, next) {
 		error: true,
 	});
 });
-
-
 
 // routes
 app.use("/admin", adminRoutes);
