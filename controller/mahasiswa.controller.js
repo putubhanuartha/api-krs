@@ -1,3 +1,4 @@
+const { sequelize 	} = require("../utils/orm");
 const Dosen = require("../model/dosen.model");
 const Krs = require("../model/krs.model");
 const MataKuliah = require("../model/matakuliah.model");
@@ -5,7 +6,6 @@ const Mahasiswa = require("../model/mahasiswa.model");
 const DosenPa = require("../model/dosenpa.model");
 const Jadwal = require("../model/jadwal.model");
 const { Op } = require("sequelize");
-const sequelize = require("../utils/orm");
 const isTimeInRange = require("../utils/checker").isTimeInRange;
 const isMatkulSelected = require("../utils/checker").isMatkulSelected;
 const isSksCountAvailable = require("../utils/checker").isSksCountAvailable;
@@ -240,13 +240,11 @@ exports.viewMahasiswa = async (req, res) => {
 		}
 	} catch (err) {
 		console.log(err);
-		res
-			.status(500)
-			.json({
-				message: "server gagal mengirimkan bio mahasiswa",
-				status: 500,
-				error: true,
-			});
+		res.status(500).json({
+			message: "server gagal mengirimkan bio mahasiswa",
+			status: 500,
+			error: true,
+		});
 	}
 };
 exports.addKrsMahasiswa = async (req, res) => {
@@ -272,7 +270,7 @@ exports.addKrsMahasiswa = async (req, res) => {
 		});
 		if (isMatkulSelected(MataKuliahKodeKelas, matkul)) {
 			res.status(400).json({
-				message:"Mahasiswa sudah memiliki matkul tersebut",
+				message: "Mahasiswa sudah memiliki matkul tersebut",
 				status: 400,
 				error: true,
 			});
@@ -426,7 +424,9 @@ exports.loginMahasiswa = async (req, res) => {
 	const { nim, password } = req.body;
 	try {
 		const mahasiswa = await Mahasiswa.findOne({ where: { nim } });
-		if (bcrypt.compareSync(password, mahasiswa.getDataValue("password"))) {
+		if (
+			bcrypt.compareSync(password, await mahasiswa.getDataValue("password"))
+		) {
 			req.session.uid = nim;
 			req.session.role = "mahasiswa";
 			req.session.isLoggedIn = true;

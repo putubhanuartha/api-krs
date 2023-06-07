@@ -6,7 +6,7 @@ const ClassRoom = require("../model/classroom.model.js");
 const Krs = require("../model/krs.model.js");
 const Jadwal = require("../model/jadwal.model.js");
 const Admin = require("../model/admin.model");
-const sequelize = require("../utils/orm.js");
+const { sequelize } = require("../utils/orm.js");
 const bcrypt = require("bcrypt");
 const { Op } = require("sequelize");
 const createIdJadwal = require("../utils/id.generator").createIdJadwal;
@@ -988,7 +988,6 @@ exports.deleteJadwal = async (req, res) => {
 		});
 	}
 };
-
 
 exports.signupAdmin = async (req, res) => {
 	const { username, password } = req.body;

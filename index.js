@@ -8,6 +8,7 @@ const port = process.env.PORT;
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
+// { cookie: { sameSite: "none", secure: true } }
 const protectCsrf = csrf({ cookie: { sameSite: "none", secure: true } });
 
 // route imports
@@ -17,23 +18,8 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-app.use(
-	cors({
-		origin: (origin, callback) => {
-			// Check if the Referer header matches the desired URLs
-			if (
-				origin === "http://localhost:5173" ||
-				origin === "http://localhost:5173/" ||
-				origin === undefined
-			) {
-				callback(null, true);
-			} else {
-				callback(new Error("Not allowed by CORS"));
-			}
-		},
-		credentials: true,
-	})
-);
+// { origin: process.env.URL_ORIGIN, credentials: true }
+app.use(cors({ origin: process.env.URL_ORIGIN, credentials: true }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
