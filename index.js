@@ -8,7 +8,6 @@ const port = process.env.PORT;
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
-// { cookie: { sameSite: "none", secure: true } }
 const protectCsrf = csrf({ cookie: { sameSite: "none", secure: true } });
 
 // route imports
@@ -18,7 +17,6 @@ const dosenRoutes = require("./routes/dosen.routes");
 const dosenPaRoutes = require("./routes/dosenPA.routes");
 
 // middleware
-// { origin: process.env.URL_ORIGIN, credentials: true }
 app.use(cors({ origin: process.env.URL_ORIGIN, credentials: true }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
