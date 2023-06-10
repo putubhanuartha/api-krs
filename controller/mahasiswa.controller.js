@@ -1,40 +1,23 @@
-const { sequelize 	} = require("../utils/orm");
+const { sequelize } = require("../utils/orm");
 const Dosen = require("../model/dosen.model");
 const Krs = require("../model/krs.model");
 const MataKuliah = require("../model/matakuliah.model");
 const Mahasiswa = require("../model/mahasiswa.model");
 const DosenPa = require("../model/dosenpa.model");
 const Jadwal = require("../model/jadwal.model");
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const isTimeInRange = require("../utils/checker").isTimeInRange;
 const isMatkulSelected = require("../utils/checker").isMatkulSelected;
 const isSksCountAvailable = require("../utils/checker").isSksCountAvailable;
 const bcrypt = require("bcrypt");
 exports.viewKrs = (req, res) => {
 	const idMahasiswa = req.session.uid;
-	Krs.findAll({
-		where: { MahasiswaNim: idMahasiswa },
-		attributes: ["MataKuliahKodeKelas"],
-	})
-		.then(async (result) => {
-			const arrRes = await Promise.all(
-				result.map(async (el) => {
-					const matkul = await MataKuliah.findOne({
-						where: { kode_kelas: el.dataValues.MataKuliahKodeKelas },
-						attributes: { exclude: ["createdAt", "updatedAt"] },
-						include: [
-							{ model: Dosen, attributes: ["nama"] },
-							{
-								model: Jadwal,
-								attributes: {
-									exclude: ["createdAt", "updatedAt"],
-								},
-							},
-						],
-					});
-					return matkul;
-				})
-			);
+	sequelize
+		.query(`CALL  SHOW_KRS_MATKUL("${idMahasiswa}")`, {
+			model: Krs,
+			mapToModel: true,
+		})
+		.then((arrRes) => {
 			if (arrRes == null || arrRes.length == 0) {
 				res.status(404).json({
 					message: "data krs mahasiswa tidak ditemukan",
@@ -44,7 +27,7 @@ exports.viewKrs = (req, res) => {
 			} else {
 				res.status(200).json({
 					message: "data krs mahasiswa sukses dikirimkan",
-					data: arrRes,
+					data: arrRes[0],
 					status: 200,
 					error: false,
 				});
@@ -101,43 +84,6 @@ exports.viewMatkul = (req, res) => {
 			});
 		});
 };
-exports.viewDosenPa = (req, res) => {
-	const { idMahasiswa } = req.params;
-	Mahasiswa.findOne({
-		where: { nim: idMahasiswa },
-		attributes: [],
-		include: [
-			{
-				model: DosenPa,
-				include: [{ model: Dosen, attributes: ["nama", "nip"] }],
-			},
-		],
-	})
-		.then((result) => {
-			if (result == null || result.length == 0) {
-				res.status(404).json({
-					message: "data dosen pa tidak ditemukan",
-					status: 404,
-					error: true,
-				});
-			} else {
-				res.status(200).json({
-					message: "data dikirimkan",
-					data: result,
-					status: 200,
-					error: false,
-				});
-			}
-		})
-		.catch((err) => {
-			console.log(err);
-			res.status(500).json({
-				message: "server gagal mengirimkan data",
-				status: 500,
-				error: true,
-			});
-		});
-};
 exports.deleteMatkulKrs = (req, res) => {
 	const MahasiswaNim = req.session.uid;
 	const MataKuliahKodeKelas = req.params.idMatkul;
@@ -156,28 +102,6 @@ exports.deleteMatkulKrs = (req, res) => {
 						error: true,
 					});
 				} else {
-					const krs = await MataKuliah.findOne({
-						where: { kode_kelas: MataKuliahKodeKelas },
-						attributes: ["sks"],
-					});
-					// update to decrement filled bench number
-					await MataKuliah.update(
-						{ filled_bench: sequelize.literal(`filled_bench - 1`) },
-						{
-							where: {
-								kode_kelas: MataKuliahKodeKelas,
-							},
-						}
-					);
-					// update to decrement sks number of mahasiswa
-					await Mahasiswa.update(
-						{
-							total_krs: sequelize.literal(
-								`total_krs - ${krs.getDataValue("sks")}`
-							),
-						},
-						{ where: { nim: MahasiswaNim } }
-					);
 					res.status(200).json({
 						message: "data berhasil dihapus, jumlah sks mahasiswa dikurangi",
 						status: 200,

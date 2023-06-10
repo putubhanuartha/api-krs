@@ -12,14 +12,13 @@ Route.delete(
 );
 Route.post("/signup", mahasiswaController.signupMahasiswa);
 
-
-
 Route.get("/view-krs", userAuth.mahasiswaAuth, mahasiswaController.viewKrs);
 Route.get(
 	"/view-mahasiswa",
 	userAuth.mahasiswaAuth,
 	mahasiswaController.viewMahasiswa
 );
+
 Route.get(
 	"/view-matkul",
 	userAuth.mahasiswaAuth,
