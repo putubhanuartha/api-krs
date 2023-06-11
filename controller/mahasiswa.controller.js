@@ -175,138 +175,14 @@ exports.addKrsMahasiswa = async (req, res) => {
 	const MahasiswaNim = req.session.uid;
 	const MataKuliahKodeKelas = req.params.idMatkul;
 	try {
-		const mahasiswa = await Mahasiswa.findOne({ where: { nim: MahasiswaNim } });
-		const selectedMatkul = await MataKuliah.findOne({
-			where: { kode_kelas: MataKuliahKodeKelas },
-			include: [
-				{
-					model: Jadwal,
-					attributes: ["start_class_time", "end_class_time", "hari"],
-				},
-			],
-		});
-		const sks = await selectedMatkul.getDataValue("sks");
-
-		// Check terlebih dahulu apakah mahasiswa sudah memiliki matkul tersebut meskipun berbeda kelas, hal tersebut tidak diperbolehkan
-		const matkul = await Krs.findAll({
-			where: { MahasiswaNim },
-			attributes: ["MataKuliahKodeKelas"],
-		});
-		if (isMatkulSelected(MataKuliahKodeKelas, matkul)) {
-			res.status(400).json({
-				message: "Mahasiswa sudah memiliki matkul tersebut",
-				status: 400,
-				error: true,
-			});
-			return;
-		}
-
-		// Check apakah matkul yang dipilih ada pada database
-		// Jika matkul ada, Check terlebih dahulu apakah mata kuliah teresebut memiliki jadwal
-		const matkulFounded = await MataKuliah.findOne({
-			where: { kode_kelas: MataKuliahKodeKelas, idJadwal: { [Op.ne]: null } },
-		});
-		if (!matkulFounded) {
-			res.status(400).json({
-				message:
-					"Mata kuliah belum memiliki jadwal atau Mata kuliah tidak ditemukan",
-				status: 400,
-				error: true,
-			});
-			return;
-		}
-
-		// Check apakah jadwal matakuliah bertabrakan
-		const jadwalMhs = await Promise.all(
-			matkul.map(async (el) => {
-				return await MataKuliah.findOne({
-					where: { kode_kelas: el.getDataValue("MataKuliahKodeKelas") },
-					attributes: [],
-					include: [
-						{
-							model: Jadwal,
-							attributes: ["start_class_time", "end_class_time", "hari"],
-						},
-					],
-				});
-			})
+		const responseAdd = await sequelize.query(
+			`CALL ADD_MATKUL_KRS_MHS('${MahasiswaNim}','${MataKuliahKodeKelas}')`
 		);
-		const arrJadwal = jadwalMhs.map((el) => {
-			return el.dataValues.jadwal.dataValues;
+		res.status(responseAdd[0].status).json({
+			message: responseAdd[0].message,
+			error: false,
+			status: responseAdd[0].status,
 		});
-		if (
-			checkArrInRange(
-				arrJadwal,
-				selectedMatkul.getDataValue("jadwal").dataValues.start_class_time,
-				selectedMatkul.getDataValue("jadwal").dataValues.end_class_time,
-				selectedMatkul.getDataValue("jadwal").dataValues.hari
-			)
-		) {
-			res.status(400).json({
-				message: "data jadwal bertabrakan",
-				status: 400,
-				error: true,
-			});
-			return;
-		}
-
-		// Check apakah kapasitas kelas mata kuliah tersebut masih ada
-		// count and compare matkul capacity
-		if (
-			selectedMatkul.getDataValue("filled_bench") ==
-			selectedMatkul.getDataValue("kapasitas")
-		) {
-			res.status(400).json({
-				message: "kapasitas kelas melebihi",
-				status: 400,
-				error: true,
-			});
-			return;
-		}
-
-		// check matkul availability for mahasiswa based on their IPK and selected SKS
-		// check apakah mahasiswa boleh memilih matkul tersebut berdasarkan IPK dan jumlah sks mereka
-		if (!isSksCountAvailable(mahasiswa, sks)) {
-			res.status(400).json({
-				message: "IPK Mahasiswa tidak mencukupi",
-				status: 400,
-				error: true,
-			});
-			return;
-		}
-
-		// Jika semuanya telah valid, maka eksekusi =======>
-		// Updating filled bench of matkul
-		await MataKuliah.update(
-			{ filled_bench: sequelize.literal(`filled_bench + 1`) },
-			{
-				where: {
-					kode_kelas: MataKuliahKodeKelas,
-				},
-			}
-		);
-		// Updating mahasiswa's krs count total
-		await Mahasiswa.update(
-			{ total_krs: sequelize.literal(`total_krs + ${sks}`) },
-			{ where: { nim: MahasiswaNim } }
-		);
-		// Updating krs join table
-		Krs.create({ MahasiswaNim, MataKuliahKodeKelas })
-			.then(() => {
-				res.status(200).json({
-					message: "data berhasil ditambahkan",
-					status: 200,
-					error: false,
-				});
-			})
-			.catch((err) => {
-				console.log(err);
-				res.status(500).json({
-					message: "server gagal menambahkan data",
-					status: 500,
-					error: true,
-				});
-			});
 	} catch (err) {
 		console.log(err);
 		res.status(500).json({
