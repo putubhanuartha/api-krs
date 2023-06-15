@@ -5,10 +5,8 @@ const MataKuliah = require("../model/matakuliah.model");
 const Mahasiswa = require("../model/mahasiswa.model");
 const DosenPa = require("../model/dosenpa.model");
 const Jadwal = require("../model/jadwal.model");
-const { Op, QueryTypes } = require("sequelize");
-const isTimeInRange = require("../utils/checker").isTimeInRange;
-const isMatkulSelected = require("../utils/checker").isMatkulSelected;
-const isSksCountAvailable = require("../utils/checker").isSksCountAvailable;
+const { Op } = require("sequelize");
+
 const bcrypt = require("bcrypt");
 exports.viewKrs = (req, res) => {
 	const idMahasiswa = req.session.uid;
@@ -284,20 +282,3 @@ exports.getLoginCsrf = (req, res) => {
 		error: false,
 	});
 };
-function checkArrInRange(arrVal, start_time, end_time, hari) {
-	for (let i = 0; i < arrVal.length; i++) {
-		if (
-			isTimeInRange(
-				start_time,
-				end_time,
-				hari,
-				arrVal[i].start_class_time,
-				arrVal[i].end_class_time,
-				arrVal[i].hari
-			)
-		) {
-			return true;
-		}
-	}
-	return false;
-}
