@@ -128,34 +128,28 @@ exports.viewMahasiswa = async (req, res) => {
 	const idMahasiswa = req.session.uid;
 	try {
 		const result = await Mahasiswa.findOne({
-			attributes: { exclude: [] },
-			include: DosenPa,
+			attributes: { exclude: ["password", "createdAt", "updatedAt","nip_dosen"] },
+			include: {
+				model: DosenPa,
+				attributes: { exclude: ["password", "createdAt", "updatedAt"] },
+				include: {
+					model: Dosen,
+					attributes: ["nama"],
+				},
+			},
 			where: {
 				nim: idMahasiswa,
 			},
 		});
 
-		const arrRes = await Promise.all(
-			result.map(async (er) => {
-				let namaDosen = null;
-				if (er.dataValues.DosenPa) {
-					const nip = er.dataValues.DosenPa.dataValues.nip_dosen;
-					namaDosen = await Dosen.findOne({
-						where: { nip },
-						attributes: ["nama", "nip"],
-					});
-				}
-				return { ...er.dataValues, DosenPa: namaDosen };
-			})
-		);
-		if (arrRes == null || arrRes.length == 0) {
+		if (result == null || result.length == 0) {
 			res
 				.status(404)
 				.json({ message: "data tidak ditemukan", status: 404, error: true });
 		} else {
 			res.status(200).json({
 				message: "data bio mahasiswa dikirimkan",
-				data: arrRes,
+				data: result,
 				status: 200,
 				error: false,
 			});
